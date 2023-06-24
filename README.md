@@ -1,63 +1,82 @@
 ### System Architecture
-Components:
-Central Server
-Resource Provider Client (RPC)
-Resource Consumer Client (RCC)
-Database
 
-Resource Provider Client (RPC):
-Functionalities:
+The Central Server serves as the core component of the distributed GPU sharing platform. It is responsible for managing GPU resources, handling user authentication, scheduling tasks, and facilitating communication between Resource Provider Clients (RPC) and Resource Consumer Clients (RCC). Below is a detailed design for the Central Server.
 
-Detect and register the user's GPU resources.
-Communicate with the Central Server to report the GPU status and availability.
-Execute tasks assigned to the GPU.
-Components:
+Components of the Central Server:
 
-GPU Detection Module: Detect GPUs in the system and collect relevant information (e.g., model, available memory).
-Communication Module: Facilitates communication with the Central Server for GPU registration and task assignments.
-Task Execution Engine: Executes the received tasks and reports the results.
-Central Server:
-Functionalities:
+1. Authentication & Authorization Module
+Purpose: To manage user accounts, authenticate users, and handle permissions.
 
-Manage registrations and authentications of both Resource Provider and Resource Consumer.
-Track and schedule available GPU resources.
-Assign tasks to available GPUs and relay the status and results to Resource Consumers.
-Components:
+Components and Functionalities:
 
-Database: Stores GPU resources information, user accounts, task statuses, etc.
-Authentication & Authorization Module: Handles user registrations and logins, as well as permission controls.
-Resource Scheduler: Schedules GPU resources based on demand and availability.
-Communication Module: Facilitates communication with both the RPC and RCC.
-Task Queue Manager: Manages the queue of tasks waiting to be executed.
-Resource Consumer Client (RCC):
-Functionalities:
+User Registration: Allows users to create accounts.
+User Authentication: Validates user credentials during login (Consider using OAuth or JWT for token-based authentication).
+Permission Management: Manages user permissions for resource providers and consumers.
 
-Allows users to request GPU resources and submit tasks.
-Display task status and results.
-Components:
+2. Resource Manager
+Purpose: To keep track of available GPU resources from the RPCs.
 
-User Interface: Offers an interface for users to select tasks and required GPU resources.
-Communication Module: Facilitates communication with the Central Server for task submission and status queries.
-Result Processing Module: Receives and processes task results.
-Database:
-The database should be robust, scalable, and performant.
-Consider using a SQL database for structured data such as user information and a NoSQL database for more flexible data such as task statuses.
-Data Flow:
-RPC detects the user’s GPU and sends the information to the Central Server for registration.
-RCC allows users to choose tasks and required GPU resources and sends the request to the Central Server.
-The Central Server’s scheduler schedules tasks based on available GPU resources and the task queue.
-RPC receives tasks, executes them using the local GPU, and sends results back to the Central Server.
-The Central Server sends results to the RCC.
-Security and Reliability:
-Use SSL/TLS to encrypt communication channels.
-Implement strong authentication and authorization policies.
-Encrypt sensitive data in the database.
-Implement error handling and retry mechanisms to increase reliability.
-Monitor system performance and errors and set up alerts.
-Scalability:
-Design the Central Server to be horizontally scalable to handle a large number of RPCs and RCCs.
-Consider using load balancers to distribute traffic among multiple instances of the Central Server.
-APIs:
-Define RESTful APIs for communication between clients (RPC and RCC) and the Central Server.
-Example endpoints: POST /register_gpu, POST /submit_task, GET /task_status.
-This is a more detailed design outline. Note that the implementation will still involve many additional details and technical challenges. It’s recommended to perform thorough research and planning before starting the implementation and consider forming a team with relevant experience to support the development process.
+Components and Functionalities:
+
+Resource Registration: Registers GPU resources provided by RPCs along with their specifications.
+Resource Monitoring: Continuously monitors the availability and status of registered resources.
+Resource Database: Maintains a record of the resources (Consider using a NoSQL database for flexibility and scalability).
+
+3. Task Queue Manager
+Purpose: To manage the queue of tasks submitted by the RCCs.
+
+Components and Functionalities:
+
+Task Submission: Allows RCCs to submit tasks to the queue.
+Task Prioritization: Prioritizes tasks based on predefined criteria.
+Task Database: Maintains records of tasks, their status, and results (SQL or NoSQL).
+
+4. Resource Scheduler
+Purpose: To allocate available GPU resources to tasks in the queue.
+
+Components and Functionalities:
+
+Scheduling Algorithm: Implements an algorithm (e.g., Round Robin, Priority Scheduling) to allocate resources efficiently.
+Resource Allocation: Assigns tasks to available GPU resources and notifies RPCs.
+Task Status Tracking: Tracks the progress of tasks and updates their status in the Task Database.
+
+5. Communication Module
+Purpose: To facilitate communication between the Central Server, RPCs, and RCCs.
+
+Components and Functionalities:
+
+API Endpoints: Defines RESTful API endpoints for interaction (e.g., GET /resources, POST /submit_task).
+Data Serialization: Handles serialization and deserialization of data (e.g., JSON, Protocol Buffers).
+Error Handling: Manages errors and exceptions in communication.
+
+6. Database (Storage Layer)
+Purpose: To store user information, GPU resources data, and tasks data.
+
+Components and Functionalities:
+
+User Table/Collection: Stores user credentials and permissions.
+Resources Table/Collection: Stores information about GPU resources.
+Tasks Table/Collection: Stores information about tasks, status, and results.
+
+7. Security Layer
+Purpose: To ensure the secure operation of the Central Server.
+
+Components and Functionalities:
+
+SSL/TLS Encryption: Encrypts communication channels.
+Data Encryption: Encrypts sensitive data in the database.
+Input Validation: Prevents SQL injection, XSS, and other malicious input.
+
+8. Monitoring & Logging
+Purpose: To monitor the performance and health of the Central Server.
+
+Components and Functionalities:
+
+Performance Monitoring: Monitors CPU, memory usage, and other performance metrics.
+Error Logging: Logs errors and exceptions.
+Alerting: Sends alerts in case of failures or performance issues.
+
+Scalability Considerations:
+Design the Central Server for horizontal scalability to handle an increased number of RPCs and RCCs.
+Utilize load balancers to distribute traffic efficiently.
+Implement caching mechanisms to reduce database load.
