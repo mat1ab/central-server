@@ -1,6 +1,6 @@
 # Central Server
 
-The Central Server acts as the heart of the Distributed GPU Sharing Platform. It is tasked with managing GPU resources, handling user authentication, scheduling tasks, and facilitating communication between Resource Provider Clients (RPCs) and Resource Consumer Clients (RCCs). Below is detailed design for the Central Server.
+The Central Server acts as the heart of the Distributed GPU Sharing Platform. It is tasked with managing GPU resources, handling user authentication, scheduling tasks, and facilitating communication between Resource Provider Clients (RPCs) and Resource Consumer Clients (RCCs). Below is a detailed design for the Central Server.
 
 ## Components of the Central Server:
 
@@ -14,36 +14,40 @@ The Central Server acts as the heart of the Distributed GPU Sharing Platform. It
 - **Permission Management**: Manages user permissions for resource providers and consumers.
 
 ### Resource Manager
-**Purpose**: To keep track of available GPU resources from the RPCs.
+**Purpose**: To track and manage the GPU resources provided by Resource Provider Clients (RPCs).
 
 #### Components and Functionalities:
-- **Resource Registration**: Registers GPU resources provided by RPCs along with their specifications.
-- **Resource Monitoring**: Continuously monitors the availability and status of registered resources.
-- **Resource Database**: Maintains a record of the resources (Consider using a NoSQL database for flexibility and scalability).
+- **Resource Registration**: Allows RPCs to register their GPU resources, including specifications such as processing power, memory, and availability status.
+- **Resource Status Monitoring**: Continuously monitors the status of registered GPU resources, checking for availability, utilization rates, and health status.
+- **Resource Database**: Maintains a record of all registered GPU resources, including their specifications and statuses.
+- **Resource Update**: Allows RPCs to update the status of their resources, such as setting them as available or unavailable for task processing.
 
 ### Task Queue Manager
-**Purpose**: To manage the queue of tasks submitted by the RCCs.
+**Purpose**: To manage the queue of tasks submitted by consumers (Resource Consumer Clients - RCCs).
 
 #### Components and Functionalities:
-- **Task Submission**: Allows RCCs to submit tasks to the queue.
-- **Task Prioritization**: Prioritizes tasks based on predefined criteria.
-- **Task Database**: Maintains records of tasks, their status, and results (SQL or NoSQL).
+- **Task Submission Interface**: Allows RCCs to submit tasks to be processed, including specifications such as processing requirements and priority.
+- **Task Queue**: A queue that holds submitted tasks awaiting allocation of GPU resources.
+- **Task Status Update**: Provides updates on task status (e.g., waiting, processing, completed) to RCCs.
+- **Task Completion Notification**: Sends notifications to RCCs when their tasks are completed.
 
 ### Resource Scheduler
-**Purpose**: To allocate available GPU resources to tasks in the queue.
+**Purpose**: To allocate available GPU resources to tasks in the task queue based on various factors such as priority and resource availability.
 
 #### Components and Functionalities:
-- **Scheduling Algorithm**: Implements an algorithm (e.g., Round Robin, Priority Scheduling) to allocate resources efficiently.
-- **Resource Allocation**: Assigns tasks to available GPU resources and notifies RPCs.
-- **Task Status Tracking**: Tracks the progress of tasks and updates their status in the Task Database.
+- **Scheduling Algorithm**: Uses scheduling algorithms such as First-Come-First-Serve, Priority Scheduling, or custom algorithms to allocate resources efficiently.
+- **Resource Allocation**: Dynamically allocates available GPU resources to tasks in the queue.
+- **Task-Resource Mapping**: Keeps track of which resources are allocated to which tasks.
+- **Resource Reclamation**: Once a task is completed, the resources are reclaimed and made available for other tasks.
 
 ### Communication Module
-**Purpose**: To facilitate communication between the Central Server, RPCs, and RCCs.
+**Purpose**: To facilitate communication between the Central Server and AI consumers (RCCs) and GPU providers (RPCs).
 
 #### Components and Functionalities:
-- **API Endpoints**: Defines RESTful API endpoints for interaction (e.g., GET /resources, POST /submit_task).
-- **Data Serialization**: Handles serialization and deserialization of data (e.g., JSON, Protocol Buffers).
-- **Error Handling**: Manages errors and exceptions in communication.
+- **API Endpoints**: Provides RESTful API endpoints for interaction between the Central Server, RCCs, and RPCs (e.g., submitting tasks, registering resources).
+- **Data Serialization/Deserialization**: Handles serialization and deserialization of data for communication (e.g., converting task data into JSON format).
+- **Authentication**: Ensures that communication is authenticated and authorized.
+- **Error Handling & Feedback**: Handles communication errors and provides feedback on the status of requests.
 
 ### Database (Storage Layer)
 **Purpose**: To store user information, GPU resources data, and tasks data.
