@@ -1,19 +1,30 @@
 CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Iinclude
 
-LDFLAGS =
+CURRENT_DIR = $(shell pwd)
+BUILD_DIR = $(CURRENT_DIR)/build
+LOG_DIR = $(BUILD_DIR)/logs
 
 SOURCES = $(wildcard src/*.cpp) main.cpp
-OBJECTS = $(SOURCES:.cpp=.o)
-EXECUTABLE = central_server
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(notdir $(SOURCES:.cpp=.o)))
+EXECUTABLE = $(BUILD_DIR)/central_server
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CXX) $^ -o $@ $(LDFLAGS)
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-%.o: %.cpp
+$(EXECUTABLE): $(OBJECTS) | $(BUILD_DIR) $(LOG_DIR)
+	$(CXX) $^ -o $@
+
+$(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
+$(BUILD_DIR)/main.o: main.cpp | $(BUILD_DIR)
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+$(LOG_DIR):
+	mkdir -p $(LOG_DIR)
+
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -rf $(BUILD_DIR)

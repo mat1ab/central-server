@@ -16,8 +16,10 @@ public:
     CentralServer();
     ~CentralServer();
     void start();
+    void shutdown();
 
 private:
+    std::atomic<bool> running;
     int port_;
     std::unique_ptr<AuthenticationModule> authentication_module_;
     std::unique_ptr<ResourceManager> resource_manager_;
@@ -27,4 +29,3 @@ private:
 };
 
 #endif // CENTRAL_SERVER_H
-
